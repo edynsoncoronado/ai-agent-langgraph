@@ -1,0 +1,22 @@
+{
+  "name": "IA Agent Container",
+  "dockerComposeFile": "./docker-compose.yml",
+  "service": "ia-agent-langgraph",
+  "workspaceFolder": "/app",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.analysis.typeCheckingMode": "basic",
+        "jupyter.askForKernelRestart": false
+      }
+    }
+  },
+
+  "remoteUser": "root"
+}

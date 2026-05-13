@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  ia-agent-langgraph:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    working_dir: /app
+    volumes:
+      - ${PWD}/app:/app
+    container_name: ia_agent_langgraph
+    tty: true
