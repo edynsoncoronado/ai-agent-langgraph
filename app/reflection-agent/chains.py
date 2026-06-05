@@ -14,6 +14,10 @@ from langchain_ollama import ChatOllama
 
 # Cargamos la configuración desde settings.py, que incluye los parámetros para conectar con Ollama
 from settings import settings
+from dotenv import load_dotenv
+
+# Cargamos las variables de entorno desde el archivo .env
+load_dotenv()
 
 # 2. PLANTILLAS DE PROMPT
 # Plantilla de prompt para la fase de generación: el modelo crea o mejora publicaciones
