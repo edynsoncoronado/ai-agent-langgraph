@@ -22,8 +22,9 @@ from langchain_core.output_parsers.openai_tools import (  # Parsers para interpr
 )  
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder  # Plantillas de prompt y placeholder del historial.
 # from langchain_openai import ChatOpenAI  # Wrapper de LangChain para modelos chat de OpenAI.
-from langchain_ollama import ChatOllama  # Wrapper de LangChain para modelos chat de Ollama (local).
-
+# from langchain_ollama import ChatOllama  # Wrapper de LangChain para modelos chat de Ollama (local).
+# from langchain_groq import ChatGroq  # Wrapper de LangChain para modelos chat de Groq (nube de Base).
+from langchain_openrouter import ChatOpenRouter  # Wrapper de LangChain para modelos chat de OpenRouter (nube de OpenRouter).
 from schemas import AnswerQuestion, ReviseAnswer  # Modelos Pydantic que definen el “formato requerido” del output.
 
 # import json
@@ -37,13 +38,28 @@ from schemas import AnswerQuestion, ReviseAnswer  # Modelos Pydantic que definen
 # print(AnswerQuestion)
 # print(AnswerQuestion.model_fields)
 
-print(f"---->settings.ollama_model: {os.getenv('OLLAMA_MODEL')}")  # Debug: muestra el modelo de Ollama configurado.
 # llm = ChatOpenAI(model="gpt-5-mini")  # Instancia del LLM; `model` selecciona el modelo a usar.
-llm = ChatOllama(
-    model=os.getenv("OLLAMA_MODEL"),
-    base_url=os.getenv("OLLAMA_BASE_URL"),
-    temperature=float(os.getenv("OLLAMA_TEMPERATURE", 0))  # Controla la aleatoriedad de las respuestas; 0 para más determinista.
-)  # Alternativa: usar Ollama localmente con el mismo modelo.
+
+# print(f"---->settings.ollama_model: {os.getenv('OLLAMA_MODEL')}")  # Debug: muestra el modelo de Ollama configurado.
+# llm = ChatOllama(
+#     model=os.getenv("OLLAMA_MODEL"),
+#     base_url=os.getenv("OLLAMA_BASE_URL"),
+#     temperature=float(os.getenv("OLLAMA_TEMPERATURE", 0))  # Controla la aleatoriedad de las respuestas; 0 para más determinista.
+# )  # Alternativa: usar Ollama localmente con el mismo modelo.
+
+print(f"---->settings.groq_model: {os.getenv('GROQ_MODEL')}")  # Debug: muestra el modelo de Groq configurado.
+# llm = ChatGroq(
+#     model=os.getenv("GROQ_MODEL"),
+#     api_key=os.getenv("GROQ_API_KEY"),
+#     temperature=0  # Controla la aleatoriedad de las respuestas; 0 para más determinista.
+# )  # Alternativa: usar Groq en la nube con el modelo y clave configurados
+
+llm = ChatOpenRouter(
+    model=os.getenv("OPENROUTER_MODEL"),
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    temperature=0  # Controla la aleatoriedad de las respuestas; 0 para más determinista.
+)  # Alternativa: usar OpenRouter en la nube con el modelo y clave configurados
+
 parser = JsonOutputToolsParser(return_id=True)  # Parser JSON; `return_id` conserva IDs de tool calls si existen.
 parser_pydantic = PydanticToolsParser(tools=[AnswerQuestion])  # Parser Pydantic para convertir la salida del tool `AnswerQuestion`.
 
@@ -125,6 +141,11 @@ revisor_prompt_template = actor_prompt_template.partial(  # Reutiliza el mismo t
 
 # 3. CREACIÓN DE CADENAS
 #------------------------------------------------------------------------------------------------
+# first_responder = (
+#     first_responder_prompt_template
+#     | llm
+# )
+
 first_responder = first_responder_prompt_template | llm.bind_tools( 
     tools=[AnswerQuestion], tool_choice="AnswerQuestion"  # Fuerza al modelo a responder como tool con el esquema de datos `AnswerQuestion`.
 )

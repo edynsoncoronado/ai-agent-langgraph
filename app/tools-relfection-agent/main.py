@@ -18,6 +18,9 @@ from langgraph.graph import END, START, StateGraph, MessagesState  # Primitivas 
 from chains import revisor, first_responder  # Chains del LLM: borrador y revisor (definidas en `chains.py`).
 from tool_executor import execute_tools  # Nodo ToolNode que ejecuta herramientas (definido en `tool_executor.py`).
 
+# from json_repair import repair_json  # Función para reparar JSON malformado (p.ej., por errores de escape de comillas).
+
+# from schemas import AnswerQuestion, ReviseAnswer  # Modelos Pydantic que definen el “formato requerido” del output.
 MAX_ITERATIONS = 2  # Límite de vueltas de “buscar → revisar” (control de coste/tiempo).
 
 # 2. CREACIÓN DE LOS NODOS DEL GRAFO
@@ -26,6 +29,31 @@ def draft_node(state: MessagesState):  # Nodo del grafo que produce el primer bo
     """Genera el primer borrador de la respuesta."""
     response = first_responder.invoke({"messages": state["messages"]})  # Llama al LLM usando el historial actual.
     return {"messages": [response]}  # Devuelve un delta de estado: añade el mensaje generado al historial.
+    # try:
+    #     data = repair_json(response.content)
+
+    #     parsed = AnswerQuestion.model_validate(data)
+
+    #     ai_message = AIMessage(
+    #         content=parsed.model_dump_json()
+    #     )
+
+    # except Exception as e:
+
+    #     ai_message = AIMessage(
+    #         content=f"""
+    #         {{
+    #             "answer": "",
+    #             "reflection": {{
+    #                 "missing": "json_parse_error",
+    #                 "superfluous": "{str(e)}"
+    #             }},
+    #             "search_queries": []
+    #         }}
+    #         """
+    #     )
+
+    # return {"messages": [ai_message]}
 
 
 def revise_node(state: MessagesState):  # Nodo del grafo que revisa tras ejecutar herramientas.
